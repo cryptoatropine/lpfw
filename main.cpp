@@ -37,6 +37,10 @@ main () {
     }
     init_nfq_handlers();
     init_iptables_rules();
+    //the main program should never quit.
+    while (true){
+        sleep (1000);
+    }
 }
 
 
@@ -96,8 +100,12 @@ void nfqHandler::threadFoo(){
  }
 
 
-int  nfq_handle_out_tcp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
-int  nfq_handle_out_udp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
+int  nfq_handle_out_tcp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){
+    cout << "Hooray! TCP OUT works";
+    }
+int  nfq_handle_out_udp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){
+    cout << "Hooray! UDP OUT works";
+    }
 int  nfq_handle_out_other ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
 int  nfq_handle_in_tcp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
 int  nfq_handle_in_udp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
