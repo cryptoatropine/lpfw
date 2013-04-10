@@ -2,6 +2,7 @@
 #include <stdlib.h> //for malloc
 #include <vector>
 #include <string>
+#include <cstdio>
 #include <iostream>
 #include <libnfnetlink/libnfnetlink.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
@@ -87,7 +88,7 @@ void nfqHandler::threadFoo(){
    //endless loop of receiving packets and calling a handler on each packet
      int rv;
      char buf[4096] __attribute__ ( ( aligned ) );
-     std::cout << "nfqfd %d\n", m_nfqfd;
+     std::cout << "nfqfd " << m_nfqfd << endl;
      while ( ( rv = recv ( m_nfqfd, buf, sizeof ( buf ), 0 ) ) && rv >= 0 )
        {
          nfq_handle_packet ( m_nfq_handle, buf, rv );
@@ -115,7 +116,7 @@ void init_nfq_handlers(){
 }
 
 void init_iptables_rules(){
-    fixed_part string = " -m state --state NEW -j NFQUEUE --queue-num ";
+    string fixed_part = " -m state --state NEW -j NFQUEUE --queue-num ";
     char NFQUEUE_NUMBER_OUT_TCP_str[6];
     char NFQUEUE_NUMBER_OUT_UDP_str[6];
     char NFQUEUE_NUMBER_OUT_OTHER_str[6];
@@ -131,12 +132,12 @@ void init_iptables_rules(){
 
     if ((system("iptables -A INPUT -d localhost -j ACCEPT") == -1) ||
         (system("iptables -A OUTPUT -d localhost -j ACCEPT") == -1) ||
-        (system(string("iptables -A OUTPUT -p tcp") += fixed_part += NFQUEUE_NUMBER_OUT_TCP_str) == -1) ||
-        (system(string("iptables -A OUTPUT -p udp") += fixed_part += NFQUEUE_NUMBER_OUT_UDP_str) == -1) ||
-        (system(string("iptables -A OUTPUT -p all") += fixed_part += NFQUEUE_NUMBER_OUT_OTHER_str) == -1) ||
-        (system(string("iptables -A INPUT -p tcp") += fixed_part += NFQUEUE_NUMBER_IN_TCP_str) == -1) ||
-        (system(string("iptables -A INPUT -p udp") += fixed_part += NFQUEUE_NUMBER_IN_UDP_str) == -1) ||
-        (system(string("iptables -A INPUT -p all") += fixed_part += NFQUEUE_NUMBER_IN_OTHER_str) == -1)){
+        (system((string("iptables -A OUTPUT -p tcp") + fixed_part + NFQUEUE_NUMBER_OUT_TCP_str + " ").c_str()) == -1) ||
+        (system((string("iptables -A OUTPUT -p udp") + fixed_part + NFQUEUE_NUMBER_OUT_UDP_str + " ").c_str()) == -1) ||
+        (system((string("iptables -A OUTPUT -p all") + fixed_part + NFQUEUE_NUMBER_OUT_OTHER_str + " ").c_str()) == -1) ||
+        (system((string("iptables -A INPUT -p tcp") + fixed_part + NFQUEUE_NUMBER_IN_TCP_str + " ").c_str()) == -1) ||
+        (system((string("iptables -A INPUT -p udp") + fixed_part + NFQUEUE_NUMBER_IN_UDP_str + " ").c_str()) == -1) ||
+        (system((string("iptables -A INPUT -p all") + fixed_part + NFQUEUE_NUMBER_IN_OTHER_str + " ").c_str()) == -1)){
         std::cout << "iptables error"; exit(IPTABLES_ERROR);
     }
 }
