@@ -6,6 +6,8 @@
 #include <iostream>
 #include <libnfnetlink/libnfnetlink.h>
 #include <libnetfilter_queue/libnetfilter_queue.h>
+#include <netinet/in.h> // should come BEFORE not AFTER <linux/netfilter.h>
+#include <linux/netfilter.h>
 
 using namespace std;
 
@@ -101,10 +103,24 @@ void nfqHandler::threadFoo(){
 
 
 int  nfq_handle_out_tcp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){
-    cout << "Hooray! TCP OUT works";
+    cout << "Hooray! TCP OUT works" << endl;
+    //don't pay attention to this magic code, I simply copy-pasted it, I just know that
+    //in order to give the ACCEPT verdict for the packet, we need to extract the "id" value
+    //netfilter creator didn't come up with a lean way to do it, hence all this ugly voodoo magic
+
+    int id;
+    struct nfqnl_msg_packet_hdr *ph = nfq_get_msg_packet_hdr ( ( struct nfq_data * ) nfad );
+    if ( ph ) { id = ntohl ( ph->packet_id ); }
+    nfq_set_verdict ( ( struct nfq_q_handle * ) qh, id, NF_ACCEPT, 0, NULL );
+    return 0;
     }
 int  nfq_handle_out_udp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){
-    cout << "Hooray! UDP OUT works";
+    cout << "Hooray! UDP OUT works" << endl;
+    int id;
+    struct nfqnl_msg_packet_hdr *ph = nfq_get_msg_packet_hdr ( ( struct nfq_data * ) nfad );
+    if ( ph ) { id = ntohl ( ph->packet_id ); }
+    nfq_set_verdict ( ( struct nfq_q_handle * ) qh, id, NF_ACCEPT, 0, NULL );
+    return 0;
     }
 int  nfq_handle_out_other ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
 int  nfq_handle_in_tcp ( struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfad, void *mdata ){}
